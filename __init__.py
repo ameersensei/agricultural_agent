@@ -1,6 +1,6 @@
 try:
-	from . import agent
+    from . import agent
 except (ImportError, ModuleNotFoundError):
-	# Optional dependency missing (e.g. `google.adk`).
-	# Avoid raising on package import so consumers can import submodules explicitly.
-	pass
+    # Optional dependency missing (e.g. `google.adk`).
+    # Avoid raising on package import so consumers can import submodules explicitly.
+    pass
