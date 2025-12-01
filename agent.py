@@ -1,6 +1,8 @@
 from google.adk.agents import Agent, SequentialAgent
-from google.adk.runners import InMemoryRunner
-from google.adk.tools import google_search, ToolContext
+from google.adk.runners import Runner
+from google.adk.tools import google_search
+from google.adk.tools.tool_context import ToolContext
+from google.adk.sessions import InMemorySessionService
 import dotenv
 import asyncio
 import os
@@ -40,13 +42,28 @@ treatment_agent = Agent(
     output_key = 'treatment',
 )
 
+chemical_env_price_agent = Agent(
+    name = 'ChemicalEnvPriceAgent',
+    model = 'gemini-2.5-flash-lite',
+    description = 'you are an agent which describe the side effects of chemicals and price of chemicals for crops.',
+    instruction = '''
+    you are and agent which get the treatment from treatment_agent as {treatment} and provide the side effects of using the chemicals for
+    crop and environment and expected price of chemicals.
+    1. use {treatment} to extract the chemicals used for treatment names.
+    2. make a table using chemicals name as first columns and side effects as second column and expected price as third column.
+    3. use the given tools to find the required informations and do not make any assumptions.
+    ''',
+    tools = [google_search],
+    output_key = 'chemical_env_price',
+)
+
 root_agent = SequentialAgent(
     name = 'RootAgent',
-    sub_agents = [crop_disease_agent, treatment_agent],
+    sub_agents = [crop_disease_agent, treatment_agent, chemical_env_price_agent],
 )
 
 
-runner = InMemoryRunner(root_agent)
+runner = Runner(agent = root_agent, app_name = 'crop_disease', session_service = InMemorySessionService())
 
 
 
